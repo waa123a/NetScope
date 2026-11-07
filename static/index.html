@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <script>history.scrollRestoration = "manual";</script>
+  <meta name="color-scheme" content="light dark">
+  <link rel="icon" href="/static/netscope.ico" type="image/x-icon">
+  <title>NetScope · 网络扫描控制台</title>
+  <script>
+    (() => {
+      const saved = localStorage.getItem("netscope-theme");
+      const theme = saved || (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+      document.documentElement.dataset.theme = theme;
+    })();
+  </script>
+  <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+  <svg class="svg-defs" aria-hidden="true">
+    <symbol id="i-grid" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/></symbol>
+    <symbol id="i-book" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20V3H6.5A2.5 2.5 0 0 0 4 5.5v14Z"/><path d="M4 19.5A1.5 1.5 0 0 0 5.5 21H20v-4"/></symbol>
+    <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></symbol>
+    <symbol id="i-radar" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><path d="m12 12 6-6M12 3v2M3 12h2"/></symbol>
+    <symbol id="i-host" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="6" rx="2"/><rect x="3" y="14" width="18" height="6" rx="2"/><path d="M7 7h.01M7 17h.01M11 7h6M11 17h6"/></symbol>
+    <symbol id="i-port" viewBox="0 0 24 24"><path d="M8 12h8M12 8v8"/><circle cx="12" cy="12" r="9"/></symbol>
+    <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol>
+    <symbol id="i-play" viewBox="0 0 24 24"><path d="m8 5 11 7-11 7V5Z"/></symbol>
+    <symbol id="i-stop" viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="2"/></symbol>
+    <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></symbol>
+    <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 3v12m-5-5 5 5 5-5M4 20h16"/></symbol>
+    <symbol id="i-chevron" viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"/></symbol>
+    <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3 4 6v5c0 5 3.4 8.6 8 10 4.6-1.4 8-5 8-10V6l-8-3Z"/><path d="m9 12 2 2 4-4"/></symbol>
+    <symbol id="i-network" viewBox="0 0 24 24"><rect x="9" y="2" width="6" height="5" rx="1"/><rect x="2" y="17" width="6" height="5" rx="1"/><rect x="16" y="17" width="6" height="5" rx="1"/><path d="M12 7v5M5 17v-5h14v5"/></symbol>
+    <symbol id="i-close" viewBox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12 4 4L19 6"/></symbol>
+    <symbol id="i-copy" viewBox="0 0 24 24"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V4H4v12h4"/></symbol>
+    <symbol id="i-moon" viewBox="0 0 24 24"><path d="M20.5 14.2A8.5 8.5 0 0 1 9.8 3.5 8.5 8.5 0 1 0 20.5 14.2Z"/></symbol>
+    <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.42 1.42M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.42-1.42M17.66 6.34l1.41-1.41"/></symbol>
+    <symbol id="i-history" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5M12 7v5l3 2"/></symbol>
+    <symbol id="i-trash" viewBox="0 0 24 24"><path d="M4 7h16M9 7V4h6v3M6 7l1 14h10l1-14M10 11v6M14 11v6"/></symbol>
+    <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+  </svg>
+
+  <div class="app-shell">
+    <aside class="sidebar">
+      <a class="brand" href="/" aria-label="NetScope 首页">
+        <span class="brand-mark"><span></span><span></span><span></span></span>
+        <span>NetScope<span class="brand-dot">.</span></span>
+      </a>
+      <div class="side-label">工作空间</div>
+      <nav class="side-nav" aria-label="主导航">
+        <a class="nav-item active" href="/" data-view="dashboard" aria-label="扫描控制台"><svg><use href="#i-grid"/></svg><span>扫描控制台</span><span class="nav-indicator"></span></a>
+        <button class="nav-item" data-view="history" aria-label="扫描历史"><svg><use href="#i-history"/></svg><span>扫描历史</span></button>
+        <button class="nav-item" data-modal="guide" aria-label="使用指南"><svg><use href="#i-book"/></svg><span>使用指南</span></button>
+        <button class="nav-item" data-modal="about" aria-label="关于 NetScope"><svg><use href="#i-info"/></svg><span>关于 NetScope</span></button>
+      </nav>
+      <div class="sidebar-bottom">
+        <div class="local-card">
+          <div class="local-icon"><svg><use href="#i-shield"/></svg></div>
+          <strong>本地运行，数据不外传</strong>
+          <p>所有扫描与结果仅保留在当前设备。</p>
+          <span><i></i> LOCAL ONLY</span>
+        </div>
+        <button id="shutdownButton" class="shutdown-button" type="button" aria-label="退出 NetScope" hidden><svg><use href="#i-close"/></svg><span>退出程序</span></button>
+        <div class="version">NETSCOPE <span>v1.0.0</span></div>
+      </div>
+    </aside>
+
+    <div class="workspace">
+      <header class="topbar">
+        <div>
+          <div class="breadcrumb"><span>工作空间</span><svg><use href="#i-chevron"/></svg><span id="breadcrumbCurrent">扫描控制台</span></div>
+          <h1 id="pageTitle">网络扫描</h1>
+        </div>
+        <div class="topbar-right">
+          <span class="connection"><i></i> 本地服务已连接</span>
+          <button id="themeToggle" class="theme-button" type="button" aria-label="切换到夜间模式" title="切换到夜间模式"><svg><use href="#i-moon"/></svg></button>
+          <button class="help-button" data-modal="guide" aria-label="打开使用指南">?</button>
+          <div class="avatar" title="本机用户">NS</div>
+        </div>
+      </header>
+
+      <main>
+        <div id="dashboardView">
+        <section class="intro">
+          <div><h2>看清你的网络<span>。</span></h2><p>快速发现在线设备与开放端口，一切从一个网段开始。</p></div>
+          <div class="network-chip"><svg><use href="#i-network"/></svg><div><span>当前网络</span><strong id="localNetwork">正在检测…</strong></div></div>
+        </section>
+
+        <section class="stats" aria-label="扫描统计">
+          <article class="stat-card">
+            <div class="stat-top"><span class="stat-icon purple"><svg><use href="#i-radar"/></svg></span><span id="scanState" class="state-badge">等待开始</span></div>
+            <div class="stat-value" id="progressValue">0<span>%</span></div>
+            <div class="stat-label">扫描进度 <span id="progressCount">0 / 0</span></div>
+            <div class="mini-progress"><span id="miniProgress"></span></div>
+          </article>
+          <article class="stat-card">
+            <div class="stat-top"><span class="stat-icon green"><svg><use href="#i-host"/></svg></span><span class="stat-hint">HOSTS</span></div>
+            <div class="stat-value" id="onlineCount">0</div>
+            <div class="stat-label">在线主机</div>
+          </article>
+          <article class="stat-card">
+            <div class="stat-top"><span class="stat-icon blue"><svg><use href="#i-port"/></svg></span><span class="stat-hint">SERVICES</span></div>
+            <div class="stat-value" id="portCount">0</div>
+            <div class="stat-label">开放端口</div>
+          </article>
+          <article class="stat-card">
+            <div class="stat-top"><span class="stat-icon orange"><svg><use href="#i-clock"/></svg></span><span class="stat-hint">ELAPSED</span></div>
+            <div class="stat-value" id="elapsed">0.0<span>s</span></div>
+            <div class="stat-label">扫描用时</div>
+          </article>
+        </section>
+
+        <section class="panel scanner-panel">
+          <div class="panel-heading">
+            <div><h3>新建扫描</h3><p>输入你拥有或获授权管理的 IPv4 地址范围</p></div>
+            <span class="protocol">IPv4 · TCP</span>
+          </div>
+          <form id="scanForm">
+            <div class="form-grid">
+              <label class="field target-field"><span>目标地址或网段</span><div class="input-wrap"><svg><use href="#i-network"/></svg><input id="targets" name="targets" placeholder="例如 192.168.1.0/24" autocomplete="off" spellcheck="false" required></div><small>支持 CIDR、单个 IP、范围；多个目标用逗号分隔</small></label>
+              <label class="field"><span>扫描端口</span><div class="input-wrap"><svg><use href="#i-port"/></svg><input id="ports" name="ports" value="22,80,443,445,3389,8080" autocomplete="off" spellcheck="false" required></div><small>支持端口和范围，如 80,443,8000-8010</small></label>
+            </div>
+            <div class="preset-row"><span>快捷选择</span><button type="button" class="preset" data-ports="22,80,443,445,3389,8080">常用端口</button><button type="button" class="preset" data-ports="80,443,8080,8443">Web 服务</button><button type="button" class="preset" data-ports="21,22,23,3389,5900">远程管理</button><button type="button" class="preset" data-ports="1-1024">前 1024 端口</button></div>
+            <details class="advanced">
+              <summary>高级设置<svg><use href="#i-chevron"/></svg></summary>
+              <div class="advanced-content">
+                <label class="field compact"><span>连接超时</span><div class="input-with-unit"><input id="timeout" type="number" min="0.2" max="5" step="0.1" value="0.8"><span>秒</span></div></label>
+                <label class="field compact"><span>主机并发数</span><input id="concurrency" type="number" min="1" max="256" value="256"></label>
+                <label class="switch-field"><input id="scanPorts" type="checkbox" checked><span class="switch"></span><span>扫描开放端口</span></label>
+                <label class="switch-field"><input id="resolveNames" type="checkbox"><span class="switch"></span><span>解析主机名</span></label>
+              </div>
+            </details>
+            <div class="form-footer"><p><svg><use href="#i-shield"/></svg>请仅扫描你拥有或已获授权的网络设备</p><button id="startButton" class="primary-button" type="submit"><svg><use href="#i-play"/></svg><span>开始扫描</span><kbd>↵</kbd></button><button id="stopButton" class="stop-button" type="button" hidden><svg><use href="#i-stop"/></svg><span>停止扫描</span></button></div>
+          </form>
+        </section>
+
+        <section class="panel results-panel">
+          <div class="results-heading">
+            <div class="results-title"><h3>扫描结果</h3><span id="resultBadge">0 台设备</span></div>
+            <div class="result-actions">
+              <label class="search-box"><svg><use href="#i-search"/></svg><input id="searchInput" type="search" placeholder="搜索 IP、MAC 或主机名" aria-label="搜索结果"></label>
+              <select id="resultFilter" aria-label="筛选结果"><option value="all">全部设备</option><option value="ports">仅有开放端口</option><option value="none">仅无开放端口</option></select>
+              <button id="exportButton" class="secondary-button" disabled><svg><use href="#i-download"/></svg>导出 CSV</button>
+            </div>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>状态</th><th>IP 地址</th><th>主机名</th><th>设备类型</th><th>MAC 地址</th><th>开放端口</th><th>服务</th><th><span class="sr-only">操作</span></th></tr></thead>
+              <tbody id="resultsBody"></tbody>
+            </table>
+            <div id="emptyState" class="empty-state">
+              <div class="radar-visual"><span class="ring ring-one"></span><span class="ring ring-two"></span><span class="ring ring-three"></span><span class="sweep"></span><svg><use href="#i-radar"/></svg></div>
+              <h4 id="emptyTitle">准备探索你的网络</h4>
+              <p id="emptyText">设置目标网段并开始扫描，发现的在线设备将显示在这里。</p>
+            </div>
+            <div id="noMatches" class="empty-state compact-empty" hidden><svg><use href="#i-search"/></svg><h4>没有匹配的设备</h4><p>试试更换关键词或筛选条件。</p></div>
+          </div>
+          <div class="table-footer"><span id="tableSummary">尚未开始扫描</span><span><i class="live-dot"></i>结果实时更新</span></div>
+        </section>
+        <footer class="page-footer"><span>NetScope · 简单、清晰的网络可见性</span><span>基于 ICMP / TCP CONNECT</span></footer>
+        </div>
+
+        <section id="historyView" hidden>
+          <div class="intro history-intro">
+            <div><h2>每一次扫描，都有迹可循<span>。</span></h2><p>自动保留最近 50 次记录，随时回看网络状态。</p></div>
+            <button id="newScanButton" class="primary-button" type="button"><svg><use href="#i-plus"/></svg><span>新建扫描</span></button>
+          </div>
+          <section class="panel history-panel">
+            <div class="results-heading">
+              <div class="results-title"><h3>扫描记录</h3><span id="historyBadge">0 条记录</span></div>
+              <div class="result-actions">
+                <label class="search-box history-search"><svg><use href="#i-search"/></svg><input id="historySearch" type="search" placeholder="搜索目标网段或 IP" aria-label="搜索历史记录"></label>
+                <button id="clearHistoryButton" class="secondary-button danger-button" disabled><svg><use href="#i-trash"/></svg>清空历史</button>
+              </div>
+            </div>
+            <div class="table-wrap history-table-wrap">
+              <table class="history-table">
+                <thead><tr><th>扫描时间</th><th>目标范围</th><th>状态</th><th>扫描地址</th><th>在线设备</th><th>开放端口</th><th>用时</th><th><span class="sr-only">操作</span></th></tr></thead>
+                <tbody id="historyBody"></tbody>
+              </table>
+              <div id="historyEmpty" class="empty-state history-empty">
+                <div class="history-empty-icon"><svg><use href="#i-history"/></svg></div>
+                <h4>还没有扫描记录</h4><p>完成一次扫描后，记录会自动出现在这里。</p>
+                <button class="secondary-button" id="emptyNewScan" type="button">开始第一次扫描</button>
+              </div>
+              <div id="historyNoMatches" class="empty-state compact-empty" hidden><svg><use href="#i-search"/></svg><h4>没有匹配的记录</h4><p>试试更换目标关键词。</p></div>
+            </div>
+            <div class="table-footer"><span id="historySummary">记录仅保存在当前设备</span><span><i class="live-dot"></i>最多保留 50 条</span></div>
+          </section>
+          <footer class="page-footer"><span>NetScope · 扫描历史</span><span>本地持久化存储</span></footer>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"><svg><use href="#i-check"/></svg><span></span></div>
+
+  <dialog id="infoModal"><div class="modal-head"><div id="modalIcon" class="modal-icon"><svg><use href="#i-book"/></svg></div><button id="closeModal" class="icon-button" aria-label="关闭"><svg><use href="#i-close"/></svg></button></div><div id="modalContent"></div></dialog>
+  <dialog id="detailModal"><div class="modal-head"><div><span class="eyebrow">设备详情</span><h3 id="detailIp"></h3></div><button class="icon-button close-detail" aria-label="关闭"><svg><use href="#i-close"/></svg></button></div><div id="detailContent"></div></dialog>
+  <dialog id="recordModal" class="record-dialog"><div class="modal-head"><div><span class="eyebrow">扫描记录详情</span><h3 id="recordTitle"></h3></div><button id="closeRecord" class="icon-button" aria-label="关闭"><svg><use href="#i-close"/></svg></button></div><div id="recordContent"></div></dialog>
+
+  <script>window.__SCAN_TOKEN__ = "__TOKEN__"; window.__UI_MODE__ = "__UI_MODE_VALUE__";</script>
+  <script src="/static/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,20 @@
+# Build artefacts: rebuilt from NetScope.spec with
+#   python -m PyInstaller --noconfirm --clean --distpath portable --workpath build NetScope.spec
+portable/
+build/
+build-dbg/
+
+# Runtime state: created next to the executable on first scan.
+data/
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Editor / OS noise
+.vscode/
+.idea/
+Thumbs.db
+desktop.ini
